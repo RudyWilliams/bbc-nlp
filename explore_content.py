@@ -11,16 +11,26 @@ def extract_content(client):
     return [(r["_id"], r["content"]) for r in result_cursor]
 
 
+def preprocess_tokens(doc):
+    """
+    1. lemmatize text
+    2. remove stopwords and punctuation and newline symbols
+    """
+    filtered_tokens = [
+        t.lemma_ for t in doc if not (t.is_punct or t.is_stop or t.is_space)
+    ]
+    return spacy.tokens.Doc(vocab=doc.vocab, words=filtered_tokens)
+
+
 client = MongoClient()
-contents = extract_content(client=client)
-# print(contents[0])
+id_contents = extract_content(client=client)
+contents = [idc[1] for idc in id_contents]
 
 
-# giant_doc_text = " +++ ".join(contents)
-# print(giant_doc)
+nlp.add_pipe(preprocess_tokens)
+docs = list(nlp.pipe(contents, disable=["ner", "parser", "tagger"])
 
-# docs = [nlp(c) for c in contents] # this takes a long time
-# suggestion is to process as one doc and then split into spans
-# spans can still be compared with .similarity as docs can be (and tokens)
 
-# giant_doc = nlp(giant_doc_text) # this exceeds the max length of 1000000
+doc1 = docs[0]
+for t in doc1:
+    print(t)

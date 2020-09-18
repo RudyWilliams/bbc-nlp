@@ -1,26 +1,16 @@
-# import pickle as pkl
-# from pymongo import MongoClient
-import spacy
+import datetime
+from bson import ObjectId
+from pymongo import MongoClient
 
-# from preprocessing_pipe import *
+client = MongoClient()
+db = client.bbcDev
+collection = db.article
+model_date = datetime.datetime.fromisoformat("2020-09-16T15:19:03.553+00:00")
+# print(model_date)
 
-# # so the best plan is to probably create
-# # a preprocessing functions script and load in all like so. Then the
-# # function will be in the namespace when unpickling
+_id = ObjectId("5f5d050e2cc0784013d43d46")
+result = collection.find_one({"spacy_doc.date": model_date}, {"spacy_doc.date": 1})
 
-# client = MongoClient()
-# db = client.bbcDev
-# collection = db.article
+print(result)
 
-# result = collection.find_one()
-# model = result["spacy_doc"][0]["model"]
-# pbytestr = result["spacy_doc"][0]["preprocessor_bytestr"]
-
-# nlp = spacy.load(model)
-# doc = nlp("This dog can run quickly. When running he is a very fast dog.")
-# preprocessor = pkl.loads(pbytestr)
-
-# clean_doc = preprocessor(doc)
-
-# print(clean_doc)
-nlp = spacy.load("en_core_web_lg")
+# print(datetime.datetime(2020, 9, 12, 14, 8, 23, 670000).isoformat())

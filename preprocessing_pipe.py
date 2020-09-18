@@ -94,7 +94,7 @@ class PreprocessPipeline:
             batch_size=batch_size,
         )
         preprocessor_bytestr = pkl.dumps(preprocessor)
-        date = datetime.datetime.today()
+        date = datetime.datetime.utcnow()
 
         for _id, doc in zip(ids, docs):
             doc_bytestr = doc.to_bytes()

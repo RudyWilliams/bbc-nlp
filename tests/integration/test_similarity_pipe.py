@@ -1,0 +1,1 @@
+from news_system import similarity_pipe

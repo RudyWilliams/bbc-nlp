@@ -35,11 +35,10 @@ class SimilarityLoader:
             result = self._query_spacy_doc(_id=_id, model_datetime=model_datetime)
             spacy_doc = self._convert_doc_bytestr(result=result, nlp_vocab=nlp_vocab)
 
-            similarities = result.get("similarities", [])
+            similarities = result.get("similarities", dict()).get("sim_array", [])
             already_calc_set = {s["other_id"] for s in similarities}
             need_calc_set = _ids_full_set - already_calc_set - {_id}
-            print(already_calc_set)
-            print(need_calc_set)
+
             new_sims = []
             for other_id in need_calc_set:
                 other_result = self._query_spacy_doc(
@@ -51,9 +50,15 @@ class SimilarityLoader:
 
                 sim = spacy_doc.similarity(other_spacy_doc)
                 new_sims.append({"other_id": other_id, "sim": sim})
-                self._push_single_sim(_id=other_id, sim={"other_id": _id, "sim": sim})
+                self._push_single_sim(
+                    _id=other_id,
+                    model_datetime=model_datetime,
+                    sim={"other_id": _id, "sim": sim},
+                )
 
-            self._push_new_sims(_id=_id, new_sims=new_sims)
+            self._push_new_sims(
+                _id=_id, model_datetime=model_datetime, new_sims=new_sims
+            )
 
         return
 
@@ -88,15 +93,23 @@ class SimilarityLoader:
             },
         )["spacy_doc"][0]["model"]
 
-    def _push_new_sims(self, _id, new_sims):
+    def _push_new_sims(self, _id, model_datetime, new_sims):
         self.mongodb_collection.update_one(
-            {"_id": _id}, {"$push": {"similarities": {"$each": new_sims}}}
+            {"_id": _id},
+            {
+                "$set": {"similarities.model_date": model_datetime},
+                "$push": {"similarities.sim_array": {"$each": new_sims}},
+            },
         )
         return
 
-    def _push_single_sim(self, _id, sim):
+    def _push_single_sim(self, _id, model_datetime, sim):
         self.mongodb_collection.update_one(
-            {"_id": _id}, {"$push": {"similarities": sim}}
+            {"_id": _id},
+            {
+                "$set": {"similarities.model_date": model_datetime},
+                "$push": {"similarities.sim_array": sim},
+            },
         )
         return
 

@@ -2,6 +2,7 @@ import datetime
 import os
 import pickle as pkl
 from pymongo import MongoClient, errors
+from pymongo.collation import Collation
 import spacy
 from spacy.tokens import Doc
 
@@ -71,7 +72,10 @@ class PreprocessPipeline:
     def filesystem_load(self, data_dir):
         collection = self.mongodb_collection
         file_data = file_generator(data_dir=data_dir)
-        collection.create_index("title", name="avoid_dups", unique=True)
+        collation = Collation(locale="en", strength=1)
+        collection.create_index(
+            "title", name="avoid_dups", unique=True, collation=collation
+        )
         try:
             result = collection.insert_many(file_data, ordered=False)
         except errors.BulkWriteError:
@@ -182,7 +186,6 @@ def preprocessing_pipeline_cli():
 
 
 if __name__ == "__main__":
-    # from pymongo import MongoClient
 
     # client = MongoClient()
     # db = client.bbcDev

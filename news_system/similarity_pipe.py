@@ -117,10 +117,10 @@ class SimilarityLoader:
 if __name__ == "__main__":
     from pymongo import MongoClient
 
-    client = MongoClient()
-    db = client.bbcTest
-    collection = db.article
+    # client = MongoClient()
+    # db = client.bbcTest
+    # collection = db.article
 
-    simload = SimilarityLoader(collection)
-    simload.initial_loader("2020-09-16T15:19:03.553+00:00")
+    # simload = SimilarityLoader(collection)
+    # simload.initial_loader("2020-09-16T15:19:03.553+00:00")
     # print(new_sims)

@@ -6,6 +6,8 @@ from pymongo.collation import Collation
 import spacy
 from spacy.tokens import Doc
 
+from news_system import config
+
 
 def preprocess_tokens(doc):
     """
@@ -172,17 +174,25 @@ def preprocessing_pipeline_cli():
 
     pipeline = PreprocessPipeline(mongodb_collection=collection)
 
-    if args.close_fs_valve:  # change preprocessor implementation
-        print("--X--[raw]--[spacy]--... \n>>>filesystem valve closed")
+    if args.close_fs_valve:
+        print("FS--x--[raw]->>-[spacy]->>-... \n>>>filesystem valve closed")
         print("Creating spaCy docs and loading into DB...")
-        pipeline.spacy_doc_load(
-            model=args.model,
-            preprocessor=preprocessor_dict[args.preprocessor],
-            disable=args.disable,
-            n_process=args.n_process,
-            batch_size=args.batch_size,
+    else:
+        print("FS->>-[raw]->>-[spacy]->>-...\n>>>filesystem valve open")
+        print(
+            "Reading data from filesystem, creating spacy docs, and loading data into DB"
         )
-        print("Creation and upload complete.")
+        pipeline.filesystem_load(data_dir=config.DATA_DIR)
+
+    pipeline.spacy_doc_load(
+        model=args.model,
+        preprocessor=preprocessor_dict[args.preprocessor],
+        disable=args.disable,
+        n_process=args.n_process,
+        batch_size=args.batch_size,
+    )
+
+    print("Creation and upload complete.")
 
 
 if __name__ == "__main__":
@@ -200,4 +210,4 @@ if __name__ == "__main__":
     #     n_process=4,
     #     batch_size=50,
     # )
-    preprocessing_pipeline_cli()
+    pass

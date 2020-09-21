@@ -1,0 +1,3 @@
+from news_system.preprocessing_pipe import preprocessing_pipeline_cli
+
+preprocessing_pipeline_cli()

@@ -20,7 +20,7 @@ def respond_to_article():
     collation = Collation(locale="en", strength=1)
     result = collection.find_one(
         {"title": title},
-        projection={"_id": 0, "title": 1, "content": 1},
+        projection={"_id": 0, "title": 1, "category": 1, "content": 1},
         collation=collation,
     )
     return jsonify(result)

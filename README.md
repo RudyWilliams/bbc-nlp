@@ -19,8 +19,10 @@ However, while working on the data, I found that 2096 of the 2225 articles were 
 
 ### Next steps & considerations
 Should I continue developing this system. There are a few things that should be visited/revisited:
- 1. As I learn more about spaCy, I expect to find better ways to do some things. I know I could revisit the lemmatization step. The step cleans the text by removing stopwords, spaces, punctuation, and replacing tokens with their lemma. The variation in similarity seems kind of small so maybe some additional steps (e.g. NER) could help the system separate articles.
- 2. The similarity measures are performed for each pair of Docs (the implementation works so that Doc1.similarity(Doc2) populates the info for article 1 and article 2 without the need for the redundant Doc2.similarity(Doc1)). However, calculating a similarity measure across categories is likely not necessary. We could use the human tagged category field or perform clustering on the Doc vectors.
-3. In the real world, a system like this should also consider relevancy in terms of time. Why recommend an article from several months ago even if they are similar? Using a publishing timestamp, the number of similarity measures needing calculated could be reduced even further by measuring only those within a certain time frame.   
-4. Take a look at custom training the word vector algorithm.
-5. Testing.
+ 1. Testing.
+ 2. As I learn more about spaCy, I expect to find better ways to do some things. I know I could revisit the lemmatization step. The step cleans the text by removing stopwords, spaces, punctuation, and replacing tokens with their lemma. The variation in similarity seems kind of small so maybe some additional steps (e.g. NER) could help the system separate articles.
+ 3. The similarity measures are performed for each pair of Docs (the implementation works so that Doc1.similarity(Doc2) populates the info for article 1 and article 2 without the need for the redundant Doc2.similarity(Doc1)). However, calculating a similarity measure across categories is likely not necessary. We could use the human tagged category field or perform clustering on the Doc vectors.
+ 4. In the real world, a system like this should also consider relevancy in terms of time. Why recommend an article from several months ago even if they are similar? Using a publishing timestamp, the number of similarity measures needing calculated could be reduced even further by measuring only those within a certain time frame.   
+ 5. Take a look at custom training the word vector algorithm.
+ 6. Better DB integration (switching between dev, testing, and actual DBs) and more careful use of instantiating connections.
+ 7. In a production environment, look into DB sessions which may be helpful for 'locking' the DB because some things could get thrown off if updates are made to DB in between some lines of code.

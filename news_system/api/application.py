@@ -22,23 +22,38 @@ def respond_to_article():
 
     collation = Collation(locale="en", strength=1)
 
-    result = collection.aggregate(
-        pipeline=[
-            {"$match": {"title": title}},
-            {
-                "$project": {
-                    "_id": 0,
-                    "spacy_doc": 0,
-                    "similarities.sim_array.other_id": 0,
-                }
-            },  # will need other_id but just checking response
-            {"$unwind": "$similarities.sim_array"},
-            {"$sort": {"similarities.sim_array.sim": -1}},
-            {"$limit": n_similar},
-        ],
-        collation=collation,
+    content_result = list(
+        collection.aggregate(
+            pipeline=[
+                {"$match": {"title": title}},
+                {
+                    "$project": {
+                        "_id": 0,
+                        "title": 1,
+                        "category": 1,
+                        "content": 1,
+                        "similarities": 1,
+                    }
+                },
+                {"$unwind": "$similarities.sim_array"},
+                {"$sort": {"similarities.sim_array.sim": -1}},
+                {"$limit": n_similar},
+            ],
+            collation=collation,
+        )
+    )  # breaking with my use of generators bc this should never be too large
+
+    similars_oids = [r["similarities"]["sim_array"]["other_id"] for r in content_result]
+    similars_result = list(
+        collection.find({"_id": {"$in": similars_oids}}, {"_id": 0, "title": 1})
     )
-    return jsonify(list(result))
+
+    content_dict = content_result[0]  # just need one of the unwind returns
+    _ = content_dict.pop("similarities", None)
+
+    response = {"article": content_dict, "similars": similars_result}
+
+    return jsonify(response)
 
 
 if __name__ == "__main__":

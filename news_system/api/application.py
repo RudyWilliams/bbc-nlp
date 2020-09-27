@@ -5,7 +5,7 @@ from pymongo.collation import Collation
 
 application = Flask(__name__)
 client = MongoClient()
-db = client.bbcTest
+db = client.bbcDev
 collection = db.article
 
 

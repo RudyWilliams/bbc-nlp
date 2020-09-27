@@ -83,9 +83,8 @@ class SimilarityLoader:
             )
         return Doc(nlp_vocab).from_bytes(spacy_doc_bytestr)
 
-    @staticmethod
-    def _query_model_str(model_datetime):
-        return collection.find_one(
+    def _query_model_str(self, model_datetime):
+        return self.mongodb_collection.find_one(
             {"spacy_doc.date": model_datetime},
             {
                 "_id": 0,
@@ -112,6 +111,42 @@ class SimilarityLoader:
             },
         )
         return
+
+
+def similarity_loader_cli():
+    import argparse
+    from pymongo import MongoClient
+
+    parser = argparse.ArgumentParser(
+        description="Calculate similarities for given model"
+    )
+
+    parser.add_argument(
+        "model_date",
+        type=str,
+        help="The model date that acts as identifier stored in DB (in ISO format)",
+    )
+    parser.add_argument(
+        "--dev",
+        action="store_true",
+        help="When flagged, run in development environment",
+    )
+
+    args = parser.parse_args()
+
+    client = MongoClient()
+
+    if args.dev:
+        db = client.bbcDev
+    else:
+        db = client.bbc
+
+    collection = db.article
+
+    loader = SimilarityLoader(mongodb_collection=collection)
+    loader.initial_loader(args.model_date)
+
+    return
 
 
 if __name__ == "__main__":

@@ -104,7 +104,7 @@ class PreprocessPipeline:
         date = datetime.datetime.utcnow()
 
         widgets = [
-            "*articles processed: ",
+            "Articles processed: ",
             progressbar.Counter("%(value)d"),
             " (",
             progressbar.Timer(),

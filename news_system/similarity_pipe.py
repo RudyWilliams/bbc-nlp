@@ -5,6 +5,7 @@
 import datetime
 import spacy
 from spacy.tokens import Doc
+import progressbar
 
 
 class SimilarityLoader:
@@ -30,8 +31,17 @@ class SimilarityLoader:
         nlp = spacy.load(model)
         nlp_vocab = nlp.vocab
 
-        for _id in _ids_full_set:
-            # turn into function ------------
+        widgets = [
+            "Completed: ",
+            progressbar.Counter("%(value)d"),
+            " (",
+            progressbar.Timer(),
+            ")",
+        ]
+        bar = progressbar.ProgressBar(widgets=widgets)
+
+        for i, _id in enumerate(_ids_full_set):
+
             result = self._query_spacy_doc(_id=_id, model_datetime=model_datetime)
             spacy_doc = self._convert_doc_bytestr(result=result, nlp_vocab=nlp_vocab)
 
@@ -59,7 +69,8 @@ class SimilarityLoader:
             self._push_new_sims(
                 _id=_id, model_datetime=model_datetime, new_sims=new_sims
             )
-
+            bar.update(i + 1)
+        bar.finish()
         return
 
     def _query_spacy_doc(self, _id, model_datetime):

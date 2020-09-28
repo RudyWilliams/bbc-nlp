@@ -1,3 +1,3 @@
-from news_system.similarity_pipe import similarity_loader_cli
+from news_system import preprocessing_pipe
 
-similarity_loader_cli()
+preprocessing_pipe.preprocessing_pipeline_cli()

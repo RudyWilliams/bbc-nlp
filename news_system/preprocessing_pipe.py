@@ -3,6 +3,7 @@ import os
 import pickle as pkl
 from pymongo import MongoClient, errors
 from pymongo.collation import Collation
+import progressbar
 import spacy
 from spacy.tokens import Doc
 
@@ -102,7 +103,17 @@ class PreprocessPipeline:
         preprocessor_bytestr = pkl.dumps(preprocessor)
         date = datetime.datetime.utcnow()
 
-        for _id, doc in zip(ids, docs):
+        widgets = [
+            "*articles processed: ",
+            progressbar.Counter("%(value)d"),
+            " (",
+            progressbar.Timer(),
+            ")",
+        ]
+        bar = progressbar.ProgressBar(widgets=widgets)
+
+        for i, id_doc in enumerate(zip(ids, docs)):
+            _id, doc = id_doc
             doc_bytestr = doc.to_bytes()
             collection.update_one(
                 {"_id": _id},
@@ -118,6 +129,8 @@ class PreprocessPipeline:
                     }
                 },
             )
+            bar.update(i + 1)
+        bar.finish()
         return
 
 
@@ -175,7 +188,7 @@ def preprocessing_pipeline_cli():
     pipeline = PreprocessPipeline(mongodb_collection=collection)
 
     if args.close_fs_valve:
-        print("FS--x--[raw]->>-[spacy]->>-... \n>>>filesystem valve closed")
+        print("Filesystem valve closed\nFS--x--[raw]->>-[spacy]->>-...")
         print("Creating spaCy docs and loading into DB...")
     else:
         print("FS->>-[raw]->>-[spacy]->>-...\n>>>filesystem valve open")
